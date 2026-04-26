@@ -26,7 +26,6 @@ protected void doFilterInternal(HttpServletRequest request,
                                 FilterChain filterChain)
         throws ServletException, IOException {
 
-    // ✅ Skip auth endpoints
     if (request.getServletPath().startsWith("/auth")) {
         filterChain.doFilter(request, response);
         return;
@@ -41,15 +40,14 @@ protected void doFilterInternal(HttpServletRequest request,
 
         if (username != null && jwtUtil.validateToken(token)) {
 
-            // ✅ FIX: assign to variable
             UsernamePasswordAuthenticationToken auth =
-                    new UsernamePasswordAuthenticationToken(
-                            username,
-                            null,
-                            java.util.List.of(
-                                    new org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_USER")
-                            )
-                    );
+                new UsernamePasswordAuthenticationToken(
+                    username,
+                    null,
+                    java.util.List.of(
+                        new org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_USER")
+                    )
+                );
 
             auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
