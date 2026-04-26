@@ -13,6 +13,8 @@ export default function ReportsListPage() {
   const [totalPages, setTotalPages]     = useState(0);
   const [search, setSearch]             = useState('');
   const [statusFilter, setStatusFilter] = useState('');
+  const [dateFrom, setDateFrom] = useState('');
+  const [dateTo, setDateTo]     = useState('');
   const searchTimer = useRef(null);
   const navigate = useNavigate();
 
@@ -24,6 +26,8 @@ export default function ReportsListPage() {
       const params = new URLSearchParams({ page, size: 10 });
       if (search)       params.append('q', search);
       if (statusFilter) params.append('status', statusFilter);
+      if (dateFrom) params.append('dateFrom', dateFrom);
+      if (dateTo)   params.append('dateTo', dateTo);
       const res = await api.get(`/api/reports?${params}`);
       setReports(res.data.content || []);
       setTotalPages(res.data.totalPages || 0);
@@ -81,6 +85,18 @@ export default function ReportsListPage() {
             <option value="RESOLVED">Resolved</option>
             <option value="CLOSED">Closed</option>
           </select>
+          <input
+  type="date"
+  value={dateFrom}
+  onChange={e => { setDateFrom(e.target.value); setPage(0); }}
+  className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+/>
+<input
+  type="date"
+  value={dateTo}
+  onChange={e => { setDateTo(e.target.value); setPage(0); }}
+  className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+/>
         </div>
 
         {error && (
