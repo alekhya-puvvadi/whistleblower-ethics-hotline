@@ -11,3 +11,4 @@ public interface ComplaintRepository extends JpaRepository<Complaint, Long> {
 
     List<Complaint> findByTitleContaining(String keyword);
 }
+

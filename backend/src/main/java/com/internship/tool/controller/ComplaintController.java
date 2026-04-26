@@ -2,9 +2,14 @@ package com.internship.tool.controller;
 
 import com.internship.tool.entity.Complaint;
 import com.internship.tool.service.ComplaintService;
-import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+import jakarta.validation.Valid;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/complaints")
@@ -16,35 +21,24 @@ public class ComplaintController {
         this.service = service;
     }
 
-    @PostMapping
-    public Complaint create(@RequestBody Complaint complaint) {
-        return service.createComplaint(complaint);
+    // ✅ POST /create
+    @PostMapping("/create")
+    public ResponseEntity<Complaint> create(@Valid @RequestBody Complaint complaint) {
+        return new ResponseEntity<>(service.createComplaint(complaint), HttpStatus.CREATED);
     }
 
-    @GetMapping
-    public List<Complaint> getAll() {
-        return service.getAllComplaints();
+    // ✅ GET /all (pagination)
+    @GetMapping("/all")
+    public ResponseEntity<Page<Complaint>> getAll(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size) {
+
+        return ResponseEntity.ok(service.getAllPaginated(PageRequest.of(page, size)));
     }
 
+    // ✅ GET /{id} with 404
     @GetMapping("/{id}")
-    public Complaint getById(@PathVariable Long id) {
-        return service.getById(id);
-    }
-
-    @GetMapping("/status/{status}")
-    public List<Complaint> getByStatus(@PathVariable String status) {
-        return service.getByStatus(status);
-    }
-
-    @PutMapping("/{id}")
-    public Complaint updateStatus(@PathVariable Long id,
-                                  @RequestParam String status) {
-        return service.updateStatus(id, status);
-    }
-
-    @DeleteMapping("/{id}")
-    public String delete(@PathVariable Long id) {
-        service.deleteComplaint(id);
-        return "Deleted successfully";
+    public ResponseEntity<Complaint> getById(@PathVariable Long id) {
+        return ResponseEntity.ok(service.getById(id));
     }
 }

@@ -1,48 +1,49 @@
 package com.internship.tool.service;
 
 import com.internship.tool.entity.Complaint;
+import com.internship.tool.repository.ComplaintRepository;
+import com.internship.tool.exception.ComplaintNotFoundException;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.time.LocalDateTime;
 
 @Service
 public class ComplaintService {
 
-    private List<Complaint> complaints = new ArrayList<>();
-    private Long idCounter = 1L;
+    private final ComplaintRepository repository;
 
+    public ComplaintService(ComplaintRepository repository) {
+        this.repository = repository;
+    }
+
+    // ✅ CREATE
     public Complaint createComplaint(Complaint complaint) {
-        complaint.setId(idCounter++);
         complaint.setStatus("OPEN");
-        complaints.add(complaint);
-        return complaint;
+        complaint.setCreatedAt(LocalDateTime.now());
+        complaint.setUpdatedAt(LocalDateTime.now());
+        return repository.save(complaint);
     }
 
-    public List<Complaint> getAllComplaints() {
-        return complaints;
+    // ✅ GET ALL (pagination)
+    public Page<Complaint> getAllPaginated(Pageable pageable) {
+        return repository.findAll(pageable);
     }
 
+    // ✅ GET BY ID (404)
     public Complaint getById(Long id) {
-        return complaints.stream()
-                .filter(c -> c.getId().equals(id))
-                .findFirst()
-                .orElseThrow(() -> new RuntimeException("Not found"));
+        return repository.findById(id)
+                .orElseThrow(() ->
+                        new ComplaintNotFoundException("Complaint not found with id " + id));
     }
 
-    public List<Complaint> getByStatus(String status) {
-        return complaints.stream()
-                .filter(c -> c.getStatus().equalsIgnoreCase(status))
-                .toList();
-    }
-
-    public Complaint updateStatus(Long id, String status) {
-        Complaint c = getById(id);
-        c.setStatus(status);
-        return c;
-    }
-
+    // ✅ DELETE
     public void deleteComplaint(Long id) {
-        complaints.removeIf(c -> c.getId().equals(id));
+        if (!repository.existsById(id)) {
+            throw new ComplaintNotFoundException("Complaint not found with id " + id);
+        }
+        repository.deleteById(id);
     }
 }
