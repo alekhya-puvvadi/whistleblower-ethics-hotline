@@ -22,6 +22,7 @@ export default function Layout({ children }) {
             { to: '/', label: '📊 Dashboard' },
             { to: '/reports', label: '📋 Reports' },
             { to: '/analytics', label: '📈 Analytics' },
+            { to: '/audit-log', label: '📜 Audit Log' },
           ].map(({ to, label }) => (
             <NavLink
               key={to}

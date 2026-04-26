@@ -7,6 +7,8 @@ import ReportDetailPage from './pages/ReportDetailPage';
 import CreateReportPage from './pages/CreateReportPage';
 import EditReportPage   from './pages/EditReportPage';
 import AnalyticsPage    from './pages/AnalyticsPage';
+import AuditLogPage from './pages/AuditLogPage';
+import AuditLogPage from './pages/AuditLogPage';
 
 function ProtectedRoute({ children }) {
   const { token } = useAuth();
@@ -23,6 +25,8 @@ function AppRoutes() {
       <Route path="/reports/:id" element={<ProtectedRoute><ReportDetailPage /></ProtectedRoute>} />
       <Route path="/reports/:id/edit" element={<ProtectedRoute><EditReportPage /></ProtectedRoute>} />
       <Route path="/analytics" element={<ProtectedRoute><AnalyticsPage /></ProtectedRoute>} />
+      <Route path="/audit-log" element={<ProtectedRoute><AuditLogPage /></ProtectedRoute>} />
+      
     </Routes>
   );
 }
