@@ -4,6 +4,7 @@ import api from '../services/api';
 import Layout from '../components/Layout';
 import StatusBadge from '../components/StatusBadge';
 import SeverityBadge from '../components/SeverityBadge';
+import FileUpload from '../components/FileUpload';
 
 function AiCard({ title, content, color, icon }) {
   return (
@@ -85,6 +86,7 @@ export default function ReportDetailPage() {
   return (
     <Layout>
       <div className="p-6 max-w-4xl mx-auto">
+
         {/* Top bar */}
         <div className="flex justify-between items-center mb-6">
           <button onClick={() => navigate('/reports')}
@@ -134,7 +136,7 @@ export default function ReportDetailPage() {
         </div>
 
         {/* AI Panel */}
-        <div className="bg-white rounded-xl shadow p-6">
+        <div className="bg-white rounded-xl shadow p-6 mb-4">
           <div className="flex items-center gap-2 mb-4">
             <span className="text-2xl">🤖</span>
             <h2 className="text-lg font-semibold text-gray-800">AI Analysis</h2>
@@ -212,7 +214,7 @@ export default function ReportDetailPage() {
             />
           )}
 
-          {/* Regenerate all button */}
+          {/* Regenerate button */}
           {(report.aiDescription || report.aiRecommendations || report.aiReport) && (
             <div className="mt-4 pt-4 border-t border-gray-100">
               <button
@@ -225,6 +227,13 @@ export default function ReportDetailPage() {
             </div>
           )}
         </div>
+
+        {/* File Upload Section */}
+        <div className="bg-white rounded-xl shadow p-6 mt-4">
+          <h2 className="text-lg font-semibold text-gray-800 mb-4">📎 Supporting Documents</h2>
+          <FileUpload reportId={id} onSuccess={() => console.log('uploaded')} />
+        </div>
+
       </div>
     </Layout>
   );
