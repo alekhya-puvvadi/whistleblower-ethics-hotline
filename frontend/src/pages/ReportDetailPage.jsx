@@ -5,12 +5,37 @@ import Layout from '../components/Layout';
 import StatusBadge from '../components/StatusBadge';
 import SeverityBadge from '../components/SeverityBadge';
 
+function AiCard({ title, content, color, icon }) {
+  return (
+    <div className={`rounded-xl border ${color} p-5 mb-4`}>
+      <div className="flex items-center gap-2 mb-3">
+        <span className="text-xl">{icon}</span>
+        <h3 className="font-semibold text-gray-800">{title}</h3>
+      </div>
+      <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">{content}</p>
+    </div>
+  );
+}
+
+function AiButton({ label, onClick, disabled, color }) {
+  return (
+    <button
+      onClick={onClick}
+      disabled={disabled}
+      className={`${color} px-4 py-2 rounded-lg text-sm font-medium transition disabled:opacity-50 mr-2 mb-2`}
+    >
+      {label}
+    </button>
+  );
+}
+
 export default function ReportDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [report, setReport]       = useState(null);
   const [loading, setLoading]     = useState(true);
   const [aiLoading, setAiLoading] = useState(false);
+  const [aiStep, setAiStep]       = useState('');
 
   useEffect(() => {
     api.get(`/api/reports/${id}`)
@@ -20,12 +45,20 @@ export default function ReportDetailPage() {
 
   const triggerAI = async (type) => {
     setAiLoading(true);
+    setAiStep(
+      type === 'describe'  ? 'Generating AI description...' :
+      type === 'recommend' ? 'Getting AI recommendations...' :
+      'Generating full AI report...'
+    );
     try {
       await api.post(`/api/reports/${id}/ai/${type}`);
       const r = await api.get(`/api/reports/${id}`);
       setReport(r.data);
+    } catch {
+      setAiStep('AI service unavailable. Please try again.');
     } finally {
       setAiLoading(false);
+      setAiStep('');
     }
   };
 
@@ -81,58 +114,115 @@ export default function ReportDetailPage() {
           </div>
           <p className="text-gray-600 mb-6 leading-relaxed">{report.description}</p>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-            <div><p className="text-gray-400 text-xs">Category</p><p className="font-medium mt-1">{report.category}</p></div>
-            <div><p className="text-gray-400 text-xs">Department</p><p className="font-medium mt-1">{report.department || '—'}</p></div>
-            <div><p className="text-gray-400 text-xs">Incident Date</p><p className="font-medium mt-1">{report.incidentDate || '—'}</p></div>
-            <div><p className="text-gray-400 text-xs">Submitted</p><p className="font-medium mt-1">{new Date(report.createdAt).toLocaleDateString()}</p></div>
+            <div>
+              <p className="text-gray-400 text-xs">Category</p>
+              <p className="font-medium mt-1">{report.category}</p>
+            </div>
+            <div>
+              <p className="text-gray-400 text-xs">Department</p>
+              <p className="font-medium mt-1">{report.department || '—'}</p>
+            </div>
+            <div>
+              <p className="text-gray-400 text-xs">Incident Date</p>
+              <p className="font-medium mt-1">{report.incidentDate || '—'}</p>
+            </div>
+            <div>
+              <p className="text-gray-400 text-xs">Submitted</p>
+              <p className="font-medium mt-1">{new Date(report.createdAt).toLocaleDateString()}</p>
+            </div>
           </div>
         </div>
 
         {/* AI Panel */}
         <div className="bg-white rounded-xl shadow p-6">
-          <h2 className="text-lg font-semibold text-gray-800 mb-4">🤖 AI Analysis</h2>
+          <div className="flex items-center gap-2 mb-4">
+            <span className="text-2xl">🤖</span>
+            <h2 className="text-lg font-semibold text-gray-800">AI Analysis</h2>
+            {report.aiProcessed && (
+              <span className="bg-green-100 text-green-700 text-xs px-2 py-1 rounded-full">
+                ✓ AI Processed
+              </span>
+            )}
+            {report.aiFallback && (
+              <span className="bg-yellow-100 text-yellow-700 text-xs px-2 py-1 rounded-full">
+                ⚠ Fallback Mode
+              </span>
+            )}
+          </div>
 
+          {/* AI Loading Spinner */}
           {aiLoading && (
-            <div className="flex items-center gap-3 py-4 text-blue-600 text-sm">
-              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-primary"></div>
-              AI is analyzing this report...
+            <div className="flex items-center gap-3 bg-blue-50 rounded-lg p-4 mb-4">
+              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary shrink-0"></div>
+              <div>
+                <p className="text-sm font-medium text-blue-800">{aiStep}</p>
+                <p className="text-xs text-blue-600 mt-1">This may take a few seconds...</p>
+              </div>
             </div>
           )}
 
+          {/* AI Description */}
           {report.aiDescription ? (
-            <div className="bg-blue-50 rounded-lg p-4 mb-3">
-              <h3 className="font-medium text-blue-800 mb-2 text-sm">📝 AI Description</h3>
-              <p className="text-sm text-blue-700">{report.aiDescription}</p>
-            </div>
+            <AiCard
+              title="AI Description"
+              content={report.aiDescription}
+              color="border-blue-200 bg-blue-50"
+              icon="📝"
+            />
           ) : (
-            <button onClick={() => triggerAI('describe')} disabled={aiLoading}
-              className="bg-blue-50 text-blue-700 border border-blue-200 px-4 py-2 rounded-lg text-sm hover:bg-blue-100 mr-2 mb-3 disabled:opacity-50">
-              Generate AI Description
-            </button>
+            <AiButton
+              label="📝 Generate AI Description"
+              onClick={() => triggerAI('describe')}
+              disabled={aiLoading}
+              color="bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100"
+            />
           )}
 
+          {/* AI Recommendations */}
           {report.aiRecommendations ? (
-            <div className="bg-green-50 rounded-lg p-4 mb-3">
-              <h3 className="font-medium text-green-800 mb-2 text-sm">💡 AI Recommendations</h3>
-              <p className="text-sm text-green-700 whitespace-pre-wrap">{report.aiRecommendations}</p>
-            </div>
+            <AiCard
+              title="AI Recommendations"
+              content={report.aiRecommendations}
+              color="border-green-200 bg-green-50"
+              icon="💡"
+            />
           ) : (
-            <button onClick={() => triggerAI('recommend')} disabled={aiLoading}
-              className="bg-green-50 text-green-700 border border-green-200 px-4 py-2 rounded-lg text-sm hover:bg-green-100 mr-2 mb-3 disabled:opacity-50">
-              Get AI Recommendations
-            </button>
+            <AiButton
+              label="💡 Get AI Recommendations"
+              onClick={() => triggerAI('recommend')}
+              disabled={aiLoading}
+              color="bg-green-50 text-green-700 border border-green-200 hover:bg-green-100"
+            />
           )}
 
+          {/* AI Full Report */}
           {report.aiReport ? (
-            <div className="bg-purple-50 rounded-lg p-4">
-              <h3 className="font-medium text-purple-800 mb-2 text-sm">📊 AI Full Report</h3>
-              <p className="text-sm text-purple-700 whitespace-pre-wrap">{report.aiReport}</p>
-            </div>
+            <AiCard
+              title="AI Full Report"
+              content={report.aiReport}
+              color="border-purple-200 bg-purple-50"
+              icon="📊"
+            />
           ) : (
-            <button onClick={() => triggerAI('report')} disabled={aiLoading}
-              className="bg-purple-50 text-purple-700 border border-purple-200 px-4 py-2 rounded-lg text-sm hover:bg-purple-100 disabled:opacity-50">
-              Generate Full AI Report
-            </button>
+            <AiButton
+              label="📊 Generate Full AI Report"
+              onClick={() => triggerAI('report')}
+              disabled={aiLoading}
+              color="bg-purple-50 text-purple-700 border border-purple-200 hover:bg-purple-100"
+            />
+          )}
+
+          {/* Regenerate all button */}
+          {(report.aiDescription || report.aiRecommendations || report.aiReport) && (
+            <div className="mt-4 pt-4 border-t border-gray-100">
+              <button
+                onClick={() => triggerAI('describe')}
+                disabled={aiLoading}
+                className="text-gray-500 hover:text-gray-700 text-xs hover:underline"
+              >
+                🔄 Regenerate AI Analysis
+              </button>
+            </div>
           )}
         </div>
       </div>
