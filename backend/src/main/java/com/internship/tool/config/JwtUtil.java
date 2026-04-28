@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 
 import java.security.Key;
 import java.util.Date;
+import java.util.List;
 
 @Component
 public class JwtUtil {
@@ -18,12 +19,21 @@ public class JwtUtil {
     }
 
     public String generateToken(String username) {
+        return generateTokenWithRoles(username, List.of("ROLE_USER"));
+    }
+
+    public String generateTokenWithRoles(String username, List<String> roles) {
         return Jwts.builder()
                 .setSubject(username)
+                .claim("roles", roles)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION))
                 .signWith(getSignKey(), SignatureAlgorithm.HS256)
                 .compact();
+    }
+
+    public String generateAdminToken(String username) {
+        return generateTokenWithRoles(username, List.of("ROLE_ADMIN", "ROLE_USER"));
     }
 
     public String extractUsername(String token) {
@@ -33,6 +43,26 @@ public class JwtUtil {
                 .parseClaimsJws(token)
                 .getBody()
                 .getSubject();
+    }
+
+    @SuppressWarnings("unchecked")
+    public List<String> extractRoles(String token) {
+        try {
+            Object rolesObj = Jwts.parserBuilder()
+                    .setSigningKey(getSignKey())
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody()
+                    .get("roles");
+            
+            if (rolesObj instanceof List) {
+                return (List<String>) rolesObj;
+            }
+            return List.of("ROLE_USER");
+        } catch (Exception e) {
+            System.err.println("Error extracting roles: " + e.getMessage());
+            return List.of("ROLE_USER");
+        }
     }
 
     public boolean validateToken(String token) {
