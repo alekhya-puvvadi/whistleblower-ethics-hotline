@@ -39,10 +39,19 @@ export default function ReportDetailPage() {
   const [aiStep, setAiStep]       = useState('');
 
   useEffect(() => {
-    api.get(`/api/reports/${id}`)
-      .then(r => setReport(r.data))
-      .finally(() => setLoading(false));
+    fetchReport();
   }, [id]);
+
+  const fetchReport = async () => {
+    try {
+      const r = await api.get(`/api/reports/${id}`);
+      setReport(r.data);
+    } catch {
+      setReport(null);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const triggerAI = async (type) => {
     setAiLoading(true);
@@ -53,8 +62,7 @@ export default function ReportDetailPage() {
     );
     try {
       await api.post(`/api/reports/${id}/ai/${type}`);
-      const r = await api.get(`/api/reports/${id}`);
-      setReport(r.data);
+      await fetchReport();
     } catch {
       setAiStep('AI service unavailable. Please try again.');
     } finally {
@@ -231,7 +239,7 @@ export default function ReportDetailPage() {
         {/* File Upload Section */}
         <div className="bg-white rounded-xl shadow p-6 mt-4">
           <h2 className="text-lg font-semibold text-gray-800 mb-4">📎 Supporting Documents</h2>
-          <FileUpload reportId={id} onSuccess={() => console.log('uploaded')} />
+          <FileUpload reportId={id} onSuccess={fetchReport} />
         </div>
 
       </div>
