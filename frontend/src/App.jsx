@@ -8,7 +8,7 @@ import CreateReportPage from './pages/CreateReportPage';
 import EditReportPage   from './pages/EditReportPage';
 import AnalyticsPage    from './pages/AnalyticsPage';
 import AuditLogPage from './pages/AuditLogPage';
-import AuditLogPage from './pages/AuditLogPage';
+
 
 function ProtectedRoute({ children }) {
   const { token } = useAuth();
