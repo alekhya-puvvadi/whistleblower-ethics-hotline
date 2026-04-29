@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import api from '../services/api';
 import Layout from '../components/Layout';
+import { SkeletonCard } from '../components/SkeletonLoader';
 
 function KpiCard({ label, value, color, icon }) {
   return (
@@ -38,14 +39,16 @@ export default function DashboardPage() {
     ? Object.entries(stats.byCategory).map(([name, value]) => ({ name, value }))
     : [];
 
-  if (loading) return (
+ if (loading) return (
     <Layout>
-      <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      <div className="p-6">
+        <div className="h-8 bg-gray-200 rounded w-48 mb-6 animate-pulse"></div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+          {[...Array(4)].map((_, i) => <SkeletonCard key={i} />)}
+        </div>
       </div>
     </Layout>
   );
-
   return (
     <Layout>
       <div className="p-6">
