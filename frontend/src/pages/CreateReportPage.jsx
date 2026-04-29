@@ -39,7 +39,7 @@ export default function CreateReportPage() {
     if (Object.keys(errs).length > 0) { setErrors(errs); return; }
     setSubmitting(true);
     try {
-      const res = await api.post('/api/reports', form);
+      const res = await api.post('/api/complaints', form);
       navigate(`/reports/${res.data.id}`);
     } catch (err) {
       setErrors({ global: err.response?.data?.message || 'Failed to submit report' });

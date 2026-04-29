@@ -28,7 +28,7 @@ export default function ReportsListPage() {
       if (statusFilter) params.append('status', statusFilter);
       if (dateFrom) params.append('dateFrom', dateFrom);
       if (dateTo)   params.append('dateTo', dateTo);
-      const res = await api.get(`/api/reports?${params}`);
+      const res = await api.get(`/api/complaints?${params}`);
       setReports(res.data.content || []);
       setTotalPages(res.data.totalPages || 0);
     } catch {
@@ -52,7 +52,7 @@ export default function ReportsListPage() {
           <h1 className="text-2xl font-bold text-gray-800">Ethics Reports</h1>
           <div className="flex gap-2">
             <button
-              onClick={() => window.open('http://localhost:8080/api/reports/export', '_blank')}
+              onClick={() => window.open('http://localhost:8080/api/complaints/export', '_blank')}
               className="border border-primary text-primary px-4 py-2 rounded-lg hover:bg-blue-50 text-sm transition"
             >
               📥 Export CSV

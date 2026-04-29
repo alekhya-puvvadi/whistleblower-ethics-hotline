@@ -15,7 +15,7 @@ export default function EditReportPage() {
   const [errors, setErrors] = useState({});
 
   useEffect(() => {
-    api.get(`/api/reports/${id}`).then(r => setForm(r.data));
+    api.get(`/api/complaints/${id}`).then(r => setForm(r.data));
   }, [id]);
 
   const handleChange = (e) => {
@@ -27,7 +27,7 @@ export default function EditReportPage() {
     if (!form.title.trim()) { setErrors({ title: 'Title is required' }); return; }
     setSaving(true);
     try {
-      await api.put(`/api/reports/${id}`, form);
+      await api.put(`/api/complaints/${id}`, form);
       navigate(`/reports/${id}`);
     } catch (err) {
       setErrors({ global: err.response?.data?.message || 'Failed to save' });

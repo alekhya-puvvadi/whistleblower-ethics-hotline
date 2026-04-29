@@ -37,7 +37,7 @@ export default function FileUpload({ reportId, onSuccess }) {
     try {
       const formData = new FormData();
       formData.append('file', file);
-      await api.post(`/api/reports/${reportId}/upload`, formData, {
+      await api.post(`/api/complaints/${reportId}/upload`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
       setSuccess('File uploaded successfully!');

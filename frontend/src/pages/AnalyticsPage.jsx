@@ -20,7 +20,7 @@ export default function AnalyticsPage() {
   const fetchStats = async () => {
     setLoading(true);
     try {
-      const res = await api.get(`/api/reports/stats?period=${period}`);
+      const res = await api.get(`/api/complaints/stats?period=${period}`);
       setStats(res.data);
     } catch {
       setStats(null);

@@ -44,7 +44,7 @@ export default function ReportDetailPage() {
 
   const fetchReport = async () => {
     try {
-      const r = await api.get(`/api/reports/${id}`);
+      const r = await api.get(`/api/complaints/${id}`);
       setReport(r.data);
     } catch {
       setReport(null);
@@ -61,7 +61,7 @@ export default function ReportDetailPage() {
       'Generating full AI report...'
     );
     try {
-      await api.post(`/api/reports/${id}/ai/${type}`);
+      await api.post(`/api/complaints/${id}/ai/${type}`);
       await fetchReport();
     } catch {
       setAiStep('AI service unavailable. Please try again.');
@@ -73,7 +73,7 @@ export default function ReportDetailPage() {
 
   const handleDelete = async () => {
     if (!window.confirm('Soft delete this report?')) return;
-    await api.delete(`/api/reports/${id}`);
+    await api.delete(`/api/complaints/${id}`);
     navigate('/reports');
   };
 

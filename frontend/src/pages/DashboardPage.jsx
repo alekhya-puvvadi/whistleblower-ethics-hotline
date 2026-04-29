@@ -27,8 +27,8 @@ export default function DashboardPage() {
 
   useEffect(() => {
     Promise.all([
-      api.get('/api/reports/stats').catch(() => ({ data: {} })),
-      api.get('/api/reports?page=0&size=5').catch(() => ({ data: { content: [] } })),
+      api.get('/api/complaints/stats').catch(() => ({ data: {} })),
+      api.get('/api/complaints?page=0&size=5').catch(() => ({ data: { content: [] } })),
     ]).then(([statsRes, reportsRes]) => {
       setStats(statsRes.data);
       setRecent(reportsRes.data.content || []);
