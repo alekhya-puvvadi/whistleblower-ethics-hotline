@@ -10,8 +10,9 @@ export function AuthProvider({ children }) {
   );
 
   const login = async (username, password) => {
-    const response = await api.post('/api/auth/login', { username, password });
-    const { token: newToken, user: newUser } = response.data;
+    const response = await api.post('/auth/login', { username, password });
+    const { token: newToken, username: userName } = response.data;
+    const newUser = { username: userName, role: 'admin' };
     localStorage.setItem('token', newToken);
     localStorage.setItem('user', JSON.stringify(newUser));
     setToken(newToken);
