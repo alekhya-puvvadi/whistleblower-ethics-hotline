@@ -44,6 +44,20 @@ export default function ReportsListPage() {
     searchTimer.current = setTimeout(() => { setPage(0); fetchReports(); }, 400);
   };
 
+  const handleExportCSV = () => {
+    const headers = "ID,Title,Status,Created At\n";
+    const rows = reports.map(r =>
+      `${r.id},"${r.title}",${r.status},${new Date(r.createdAt).toLocaleDateString()}`
+    ).join("\n");
+    const csvContent = "data:text/csv;charset=utf-8," + headers + rows;
+    const link = document.createElement("a");
+    link.setAttribute("href", encodeURI(csvContent));
+    link.setAttribute("download", "reports.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   return (
     <Layout>
       <div className="p-6">
@@ -52,7 +66,7 @@ export default function ReportsListPage() {
           <h1 className="text-2xl font-bold text-gray-800">Ethics Reports</h1>
           <div className="flex gap-2">
             <button
-              onClick={() => window.open('http://localhost:8080/api/complaints/export', '_blank')}
+              onClick={handleExportCSV}
               className="border border-primary text-primary px-4 py-2 rounded-lg hover:bg-blue-50 text-sm transition"
             >
               📥 Export CSV
@@ -80,23 +94,23 @@ export default function ReportsListPage() {
             className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
           >
             <option value="">All Statuses</option>
-            <option value="SUBMITTED">Submitted</option>
-            <option value="UNDER_REVIEW">Under Review</option>
+            <option value="OPEN">Open</option>
+            <option value="IN_PROGRESS">In Progress</option>
             <option value="RESOLVED">Resolved</option>
             <option value="CLOSED">Closed</option>
           </select>
           <input
-  type="date"
-  value={dateFrom}
-  onChange={e => { setDateFrom(e.target.value); setPage(0); }}
-  className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-/>
-<input
-  type="date"
-  value={dateTo}
-  onChange={e => { setDateTo(e.target.value); setPage(0); }}
-  className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-/>
+            type="date"
+            value={dateFrom}
+            onChange={e => { setDateFrom(e.target.value); setPage(0); }}
+            className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+          />
+          <input
+            type="date"
+            value={dateTo}
+            onChange={e => { setDateTo(e.target.value); setPage(0); }}
+            className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+          />
         </div>
 
         {error && (
@@ -137,7 +151,7 @@ export default function ReportsListPage() {
                           {r.title}
                         </span>
                       </td>
-                      <td className="px-4 py-3 text-sm">{r.category}</td>
+                      <td className="px-4 py-3 text-sm">{r.category || '—'}</td>
                       <td className="px-4 py-3"><SeverityBadge severity={r.severity} /></td>
                       <td className="px-4 py-3"><StatusBadge status={r.status} /></td>
                       <td className="px-4 py-3 text-sm text-gray-500">
