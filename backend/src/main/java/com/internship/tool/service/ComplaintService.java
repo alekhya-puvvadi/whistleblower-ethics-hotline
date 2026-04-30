@@ -5,12 +5,10 @@ import com.internship.tool.repository.ComplaintRepository;
 import com.internship.tool.exception.ComplaintNotFoundException;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -34,31 +32,27 @@ public class ComplaintService {
         complaint.setCreatedAt(LocalDateTime.now());
         complaint.setUpdatedAt(LocalDateTime.now());
         Complaint saved = repository.save(complaint);
-        
-        // Send email notification
+
         try {
             emailService.sendComplaintCreatedEmail("admin@whistleblower.com", saved.getTitle(), saved.getId());
         } catch (Exception e) {
             System.err.println("⚠️ Failed to send complaint creation email: " + e.getMessage());
         }
-        
+
         return saved;
     }
 
-    // ✅ GET ALL (cached)
-    @Cacheable(value = "complaints")
+    // ✅ GET ALL
     public List<Complaint> getAllComplaints() {
         return repository.findAll();
     }
 
-    // ✅ GET ALL PAGINATED (optional cache)
-    @Cacheable(value = "complaintsPage", key = "#pageable.pageNumber")
+    // ✅ GET ALL PAGINATED (no cache - Page not serializable)
     public Page<Complaint> getAllPaginated(Pageable pageable) {
         return repository.findAll(pageable);
     }
 
-    // ✅ GET BY ID (cached)
-    @Cacheable(value = "complaint", key = "#id")
+    // ✅ GET BY ID
     public Complaint getById(Long id) {
         return repository.findById(id)
                 .orElseThrow(() ->
@@ -70,14 +64,13 @@ public class ComplaintService {
     public Complaint updateComplaint(Long id, Complaint complaint) {
         Complaint existing = getById(id);
         String oldStatus = existing.getStatus();
-        
+
         existing.setTitle(complaint.getTitle());
         existing.setDescription(complaint.getDescription());
         existing.setStatus(complaint.getStatus());
         existing.setUpdatedAt(LocalDateTime.now());
         Complaint updated = repository.save(existing);
-        
-        // Send status update email if status changed
+
         if (!oldStatus.equals(complaint.getStatus())) {
             try {
                 emailService.sendComplaintStatusUpdateEmail("admin@whistleblower.com", updated.getTitle(), complaint.getStatus());
@@ -85,7 +78,7 @@ public class ComplaintService {
                 System.err.println("⚠️ Failed to send status update email: " + e.getMessage());
             }
         }
-        
+
         return updated;
     }
 
